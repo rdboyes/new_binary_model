@@ -154,3 +154,63 @@ opt$par
 # gamma_a = 0.155
 # gamma_b = 0.430
 # gamma_c = 0.200
+
+#### -------------------- Next Dataset --------------------------
+
+## now trying model with positive, negative, and zero gamma values
+
+n <- 5000
+
+y_when_all_0 <- 0.3
+c_when_all_0 <- 0.2
+b_when_all_0 <- 0.3
+a_probability <- 0.6
+
+effect_c_on_y <-  -0.2
+
+effect_b_on_c <-  0
+effect_b_on_y <-  0.3
+
+effect_a_on_b <-  0.0
+effect_a_on_c <-  0.0
+effect_a_on_y <-  0.0
+
+# values should be:
+# beta = 0.3
+# gamma_a = 0
+# gamma_b = 3/7
+# gamma_c = -2/3
+
+a <- rbinom(n, 1, a_probability)
+
+data <- data.frame(a = a, b = 0, c = 0, y = 0)
+
+for(i in 1:n){
+  data$b[i] <- rbinom(1, 1, b_when_all_0 + data$a[i] * effect_a_on_b)
+  data$c[i] <- rbinom(1, 1, c_when_all_0 + data$b[i] * effect_b_on_c + data$a[i] * effect_a_on_c)
+  data$y[i] <- rbinom(1, 1, y_when_all_0 + data$c[i] * effect_c_on_y + data$b[i] * effect_b_on_y + data$a[i] * effect_a_on_y)
+}
+
+a <- data$a
+b <- data$b
+c <- data$c
+y <- data$y
+
+opt <- optim_sa(fun = full_ll, maximization = T,
+                start = c(runif(3, gamma_lower, gamma_upper), runif(1, beta_lower, beta_upper)),
+                lower = c(gamma_lower, gamma_lower, gamma_lower, beta_lower),
+                upper = c(gamma_upper, gamma_upper, gamma_upper, beta_upper),
+                trace = TRUE, 
+                control = list(dyn_rf = FALSE,
+                               rf = 1.6,
+                               t0 = 100,
+                               nlimit = 400,
+                               r = 0.6,
+                               t_min = 0.1))
+
+opt$par
+
+# a = -0.08209405
+# b = 0.45349369 
+# c = -0.56729634  
+# beta = 0.30398991
