@@ -11,7 +11,7 @@ functions{
     } 
   }
   
-  real fg(real p, real V, real gamma){
+  real fg(real p, int V, real gamma){
     if(V == 1){
       return pto(p, gamma);
     }
@@ -20,26 +20,22 @@ functions{
     }
   }
   
-  real prob_y1(real A, real B, real C, real g_a, real g_b, real g_c, real beta){
-    return fg(fg(fg(beta, A, g_a), B, g_b), C, g_c);
-  }
-  
-  real get_multiplier (real gamma){
-    if (gamma == 0){
-      return 1;
+  real prob_y1(int y, int A, int B, int C, real g_a, real g_b, real g_c, real beta){
+    if (y == 1){
+      return log(fg(fg(fg(beta, A, g_a), B, g_b), C, g_c));
     }
-    else if (gamma > 0){
-      return 
+    else{
+      return log1m(fg(fg(fg(beta, A, g_a), B, g_b), C, g_c));
     }
   }
 }
 
 data{
   int<lower=0> N;
-  vector[N] a;
-  vector[N] b;
-  vector[N] c;
-  vector[N] y;
+  int a[N];
+  int b[N];
+  int c[N];
+  int y[N];
 }
 
 parameters{
@@ -49,10 +45,7 @@ parameters{
   real<lower=0, upper=1> beta;
 }
 
-transformed parameters{
-  
-}
-
 model{
-  
+  for (i in 1:N) 
+    target += prob_y1(y[i], a[i], b[i], c[i], gamma_a, gamma_b, gamma_c, beta);
 }
