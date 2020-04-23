@@ -101,6 +101,20 @@ fit2 <- stan("stan_model.stan", data = stan_data2, iter = 4000, control = list(a
 
 fit_list <- list()
 
+y_when_all_0 <- 0.3
+c_when_all_0 <- 0.2
+b_when_all_0 <- 0.3
+a_probability <- 0.6
+
+effect_c_on_y <-  -0.2
+
+effect_b_on_c <-  0
+effect_b_on_y <-  0.3
+
+effect_a_on_b <-  0
+effect_a_on_c <-  0
+effect_a_on_y <-  0.0
+
 for(model in 1:100){
   a <- rbinom(n, 1, a_probability)
 
@@ -135,18 +149,26 @@ mean_a <- mean(summary$mean[summary$rowname == "gamma_a"])
 summary %>% filter(rowname == "gamma_a") %>% 
   ggplot(aes(x = iter, ymin = `2.5%`, ymax =`97.5%`)) +
   geom_errorbar() + geom_hline(yintercept = 0, color = 'red') +
-  ggtitle("Average values show bias away from true values") +
+  ggtitle("Gamma A") +
   geom_hline(yintercept = mean(summary$mean[summary$rowname == "gamma_a"]), linetype = "dotted") -> plot_gamma_a
 
 summary %>% filter(rowname == "gamma_b") %>% 
   ggplot(aes(x = iter, ymin = `2.5%`, ymax =`97.5%`)) +
   geom_errorbar() + geom_hline(yintercept = 3/7, color = 'red') +
+  ggtitle("Gamma B") +
   geom_hline(yintercept = mean(summary$mean[summary$rowname == "gamma_b"]), linetype = "dotted") -> plot_gamma_b
 
 summary %>% filter(rowname == "gamma_c") %>% 
   ggplot(aes(x = iter, ymin = `2.5%`, ymax =`97.5%`)) +
   geom_errorbar() + geom_hline(yintercept = -2/3, color = 'red') +
+  ggtitle("Gamma C") +
   geom_hline(yintercept = mean(summary$mean[summary$rowname == "gamma_c"]), linetype = "dotted") -> plot_gamma_c
 
-ggsave(plot_gamma_a/plot_gamma_b/plot_gamma_c, file = "bias.png") 
+summary %>% filter(rowname == "beta") %>% 
+  ggplot(aes(x = iter, ymin = `2.5%`, ymax =`97.5%`)) +
+  geom_errorbar() + geom_hline(yintercept = .3, color = 'red') +
+  ggtitle("Beta") +
+  geom_hline(yintercept = mean(summary$mean[summary$rowname == "beta"]), linetype = "dotted") -> plot_beta
+
+ggsave(plot_gamma_a/plot_gamma_b/plot_gamma_c/plot_beta, file = "bias.png") 
 
